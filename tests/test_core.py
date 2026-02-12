@@ -1,13 +1,11 @@
 #!/usr/bin/env python
-
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 import tomlkit
-
-from scripts.pinnochio import (
+from pinnochio.core import (
     _add_upper_bound,
     _fix_dependencies_in_group,
     check_all_dependencies_are_pinned_above,
@@ -131,7 +129,7 @@ def test_add_upper_bound_invalid_version():
 
 
 def test_load_uv_dependencies(temp_pyproject_file):
-    with patch("scripts.pinnochio.Path") as mock_path:
+    with patch("pinnochio.core.Path") as mock_path:
         mock_path.return_value = temp_pyproject_file
 
         groups, doc = load_uv_dependencies()
@@ -194,9 +192,7 @@ def test_fix_unpinned_dependencies(capsys):
 
     captured = capsys.readouterr()
     assert "Fixing: Adding upper bounds" in captured.out
-    assert (
-        "Fixed: requests>=2.25.0 -> requests>=2.25.0,<2.26.0" in captured.out
-    )
+    assert "Fixed: requests>=2.25.0 -> requests>=2.25.0,<2.26.0" in captured.out
     assert doc["project"]["dependencies"][0] == "requests>=2.25.0,<2.26.0"
 
 
@@ -393,7 +389,7 @@ def test_save_toml_document(temp_pyproject_file):
     doc = tomlkit.document()
     doc["project"] = {"name": "test-project", "version": "0.1.0"}
 
-    with patch("scripts.pinnochio.Path") as mock_path:
+    with patch("pinnochio.core.Path") as mock_path:
         mock_path.return_value = temp_pyproject_file
 
         save_toml_document(doc)
@@ -403,4 +399,3 @@ def test_save_toml_document(temp_pyproject_file):
             content = f.read()
             assert "test-project" in content
             assert "0.1.0" in content
-
