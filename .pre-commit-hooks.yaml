@@ -1,0 +1,8 @@
+- id: pinnochio
+  name: pinnochio
+  description: 'Lint dependencies in pyproject.toml'
+  entry: pinnochio
+  language: python
+  files: ^pyproject\.toml$
+  pass_filenames: false
+  additional_dependencies: []

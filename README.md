@@ -64,8 +64,30 @@ Warning: The following dependency groups aren't sorted:
 
 ## Pre-commit Hook
 
-Coming soon: Pinnochio will be available as a pre-commit hook to enforce
-dependency hygiene in your CI/CD pipeline.
+Add pinnochio to your `.pre-commit-config.yaml`:
+
+```yaml
+repos:
+  - repo: https://github.com/BlakeJC94/pinnochio
+    rev: v0.1.0  # Use the latest version
+    hooks:
+      - id: pinnochio
+```
+
+This will run `pinnochio` automatically whenever you commit changes to
+`pyproject.toml`. If issues are found, the commit will be blocked until they're
+fixed.
+
+To automatically fix issues during pre-commit, you can pass the `--fix` flag:
+
+```yaml
+repos:
+  - repo: https://github.com/anomalyco/pinnochio
+    rev: v0.1.0
+    hooks:
+      - id: pinnochio
+        args: [--fix]
+```
 
 ## Requirements
 
