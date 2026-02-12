@@ -1,0 +1,4 @@
+[tools]
+pre-commit = "4.2.0"
+ruff = "0.15.0"
+uv = "0.9.26"
