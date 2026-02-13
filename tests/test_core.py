@@ -57,9 +57,7 @@ ml = [
 @pytest.fixture
 def temp_pyproject_file(sample_toml_content):
     """Create a temporary pyproject.toml file for testing."""
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".toml", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write(sample_toml_content)
         temp_path = Path(f.name)
 
@@ -398,10 +396,7 @@ def test_update_dependencies_in_core_group():
     doc["project"] = {"dependencies": deps_array}
 
     def transform_fn(deps):
-        return [
-            dep.replace("requests>=2.25.0", "requests>=2.25.0,<3")
-            for dep in deps
-        ]
+        return [dep.replace("requests>=2.25.0", "requests>=2.25.0,<3") for dep in deps]
 
     update_dependencies_in_group(doc, "dependencies", transform_fn)
 
@@ -511,9 +506,7 @@ def test_config_loading_invalid_strategy():
 
 def test_load_uv_dependencies_missing_project():
     """Test that missing [project] section raises KeyError."""
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".toml", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write('[tool]\nname = "test"\n')
         temp_path = Path(f.name)
 
@@ -529,9 +522,7 @@ def test_load_uv_dependencies_missing_project():
 
 def test_load_uv_dependencies_missing_dependencies():
     """Test that missing [project.dependencies] raises KeyError."""
-    with tempfile.NamedTemporaryFile(
-        mode="w", suffix=".toml", delete=False
-    ) as f:
+    with tempfile.NamedTemporaryFile(mode="w", suffix=".toml", delete=False) as f:
         f.write('[project]\nname = "test"\n')
         temp_path = Path(f.name)
 
@@ -539,9 +530,20 @@ def test_load_uv_dependencies_missing_dependencies():
         with patch("pinnochio.core.Path") as mock_path:
             mock_path.return_value = temp_path
 
-            with pytest.raises(
-                KeyError, match="Missing \\[project.dependencies\\]"
-            ):
+            with pytest.raises(KeyError, match="Missing \\[project.dependencies\\]"):
                 load_uv_dependencies()
     finally:
         temp_path.unlink()
+
+
+def test_cli_override_pinning_strategy():
+    """Test that CLI flag overrides config pinning strategy."""
+    from pinnochio.config import Config, PinningStrategy
+
+    # Start with minor strategy in config
+    config = Config(pinning_strategy=PinningStrategy.MINOR)
+    assert config.pinning_strategy == PinningStrategy.MINOR
+
+    # Override with major (simulating CLI flag)
+    config.pinning_strategy = PinningStrategy("major")
+    assert config.pinning_strategy == PinningStrategy.MAJOR

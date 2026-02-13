@@ -5,6 +5,7 @@ import sys
 
 import tomlkit.exceptions
 
+from pinnochio.config import PinningStrategy
 from pinnochio.core import (
     CheckStatus,
     check_all_groups_are_sorted,
@@ -25,9 +26,13 @@ def main() -> int:
         action="store_true",
         help="Automatically fix issues where possible",
     )
+    parser.add_argument(
+        "--pinning-strategy",
+        choices=["major", "minor", "patch"],
+        help="Override the pinning strategy (default: use config or 'major')",
+    )
     args = parser.parse_args()
 
-    error_raised = False
     try:
         groups, doc, config = load_uv_dependencies()
     except FileNotFoundError:
@@ -35,7 +40,7 @@ def main() -> int:
             "Error: pyproject.toml not found in current directory",
             file=sys.stderr,
         )
-        error_raised = True
+        return 1
     except tomlkit.exceptions.TOMLKitError as e:
         print(
             "Error: Malformed pyproject.toml file",
@@ -45,22 +50,23 @@ def main() -> int:
             f"  {e}",
             file=sys.stderr,
         )
-        error_raised = True
+        return 1
     except KeyError as e:
         print(
             f"Error: {e}",
             file=sys.stderr,
         )
-        error_raised = True
+        return 1
     except ValueError as e:
         print(
             f"Error: {e}",
             file=sys.stderr,
         )
-        error_raised = True
-
-    if error_raised:
         return 1
+
+    # Override pinning strategy if specified via CLI
+    if args.pinning_strategy:
+        config.pinning_strategy = PinningStrategy(args.pinning_strategy)
 
     checks = [
         check_upper_bounds,

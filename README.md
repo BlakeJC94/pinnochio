@@ -34,6 +34,9 @@ pinnochio
 
 # Check and automatically fix issues
 pinnochio --fix
+
+# Override pinning strategy for this run
+pinnochio --fix --pinning-strategy minor
 ```
 
 ### Example Output
@@ -75,7 +78,8 @@ pinning-strategy = "major"  # Default: "major"
 ### Pinning Strategies
 
 The `pinning-strategy` option controls how upper bounds are added to
-dependencies:
+dependencies. You can set it in your config file or override it with the
+`--pinning-strategy` CLI flag:
 
 - **`"major"`** (default): Allows minor and patch updates within the same major
   version
@@ -92,6 +96,9 @@ dependencies:
   - Example: `>=1.2.3` becomes `>=1.2.3,<1.2.4`
   - Most restrictive, useful for critical production systems
   - Requires manual version bumps for any updates
+
+**Note:** The `--pinning-strategy` CLI flag always takes precedence over the
+config file setting.
 
 ## Checks Performed
 
