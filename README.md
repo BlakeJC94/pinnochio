@@ -48,11 +48,56 @@ Warning: The following dependency groups aren't sorted:
   dev
 ```
 
+With `--fix`, pinnochio will automatically add upper bounds:
+
+```text
+Fixing: Adding upper bounds to unpinned dependencies...
+  Fixed: requests>=2.25.0 -> requests>=2.25.0,<3.0.0
+  Fixed: numpy>=1.20.0 -> numpy>=1.20.0,<2.0.0
+Fixed: Upper bounds have been added where possible.
+
+Fixing: Sorting dependency groups...
+Fixed: Dependency groups have been sorted.
+
+Changes have been written to pyproject.toml
+```
+
+## Configuration
+
+Pinnochio can be configured via the `[tool.pinnochio]` section in your
+`pyproject.toml`:
+
+```toml
+[tool.pinnochio]
+pinning-strategy = "major"  # Default: "major"
+```
+
+### Pinning Strategies
+
+The `pinning-strategy` option controls how upper bounds are added to
+dependencies:
+
+- **`"major"`** (default): Allows minor and patch updates within the same major
+  version
+  - Example: `>=1.2.3` becomes `>=1.2.3,<2.0.0`
+  - Follows semantic versioning: breaking changes at major version boundaries
+  - Recommended for most projects
+
+- **`"minor"`**: Only allows patch updates within the same minor version
+  - Example: `>=1.2.3` becomes `>=1.2.3,<1.3.0`
+  - More restrictive, useful for projects requiring high stability
+  - Prevents feature additions that might affect behavior
+
+- **`"patch"`**: No automatic updates, only the exact patch version
+  - Example: `>=1.2.3` becomes `>=1.2.3,<1.2.4`
+  - Most restrictive, useful for critical production systems
+  - Requires manual version bumps for any updates
+
 ## Checks Performed
 
 1. **Upper Bound Pinning**: Dependencies with only lower bounds (e.g.,
-  `>=1.0.0`) are flagged and can be auto-fixed to include upper bounds (e.g.,
-  `>=1.0.0,<1.1.0`)
+  `>=1.0.0`) are flagged and can be auto-fixed to include upper bounds based on
+  your configured pinning strategy
 
 2. **Dependency Sorting**: All dependency groups must be alphabetically sorted
 

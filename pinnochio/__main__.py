@@ -3,11 +3,14 @@
 import argparse
 import sys
 
+import tomlkit.exceptions
+
 from pinnochio.core import (
-    check_all_dependencies_are_pinned_above,
+    CheckStatus,
     check_all_groups_are_sorted,
     check_group_overlaps_match,
     check_no_overlap_between_core_deps_and_groups,
+    check_upper_bounds,
     load_uv_dependencies,
     save_toml_document,
 )
@@ -24,44 +27,71 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    error_raised = False
     try:
-        groups, doc = load_uv_dependencies()
+        groups, doc, config = load_uv_dependencies()
     except FileNotFoundError:
-        print("Error: pyproject.toml not found in current directory")
-        return 1
-    except Exception as e:
-        print(f"Error loading pyproject.toml: {e}")
+        print(
+            "Error: pyproject.toml not found in current directory",
+            file=sys.stderr,
+        )
+        error_raised = True
+    except tomlkit.exceptions.TOMLKitError as e:
+        print(
+            "Error: Malformed pyproject.toml file",
+            file=sys.stderr,
+        )
+        print(
+            f"  {e}",
+            file=sys.stderr,
+        )
+        error_raised = True
+    except KeyError as e:
+        print(
+            f"Error: {e}",
+            file=sys.stderr,
+        )
+        error_raised = True
+    except ValueError as e:
+        print(
+            f"Error: {e}",
+            file=sys.stderr,
+        )
+        error_raised = True
+
+    if error_raised:
         return 1
 
     checks = [
-        check_all_dependencies_are_pinned_above,
+        check_upper_bounds,
         check_all_groups_are_sorted,
         check_group_overlaps_match,
         check_no_overlap_between_core_deps_and_groups,
     ]
 
-    issues_found = []
-    all_issues_fixed = True
-
+    results = []
     for check in checks:
-        result, was_fixed = check(groups, doc, fix=args.fix)
-        if result:
-            issues_found.append(result)
-            if not was_fixed:
-                all_issues_fixed = False
+        result = check(groups, doc, config, fix=args.fix)
+        results.append(result)
 
-    if args.fix and any(issues_found):
+    # Check if any issues were found or fixed
+    has_issues = any(r.has_issues for r in results)
+    all_fixed = all(
+        r.status in (CheckStatus.PASSED, CheckStatus.FIXED) for r in results
+    )
+
+    if args.fix and has_issues:
         save_toml_document(doc)
         print("Changes have been written to pyproject.toml")
 
         # Return 0 only if all issues were actually fixed
-        if all_issues_fixed:
+        if all_fixed:
             return 0
         else:
             print("Some issues could not be automatically fixed.")
             return 1
 
-    return 1 if any(issues_found) else 0
+    return 0 if not has_issues else 1
 
 
 if __name__ == "__main__":
