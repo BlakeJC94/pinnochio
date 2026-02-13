@@ -1,13 +1,18 @@
 [project]
 name = "pinnochio"
-version = "0.1.0"
+version = "1.0.0"
 description = "A dependency linter for Python projects using UV to enforce version pinning best practices"
 readme = "README.md"
 license = "MIT"
-authors = [
-    {name = "Blake", email = "blake@probableoddysey.blog"}
+authors = [{ name = "Blake", email = "blake@probableoddysey.blog" }]
+keywords = [
+    "uv",
+    "dependencies",
+    "linting",
+    "pyproject",
+    "packaging",
+    "pre-commit",
 ]
-keywords = ["uv", "dependencies", "linting", "pyproject", "packaging", "pre-commit"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -18,18 +23,17 @@ classifiers = [
     "Topic :: Software Development :: Quality Assurance",
 ]
 requires-python = ">=3.11"
-dependencies = [
-    "packaging>=24.0,<25.0.0",
-    "tomlkit>=0.14.0,<0.15.0",
-]
+dependencies = ["packaging>=24.0,<25.0.0", "tomlkit>=0.14.0,<0.15.0"]
 
 [project.scripts]
 pinnochio = "pinnochio.__main__:main"
 
 [dependency-groups]
-dev = [
-    "pytest>=9.0.2,<10.0.0",
-]
+dev = ["pytest>=9.0.2,<10.0.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pinnochio]
 pinning-strategy = "major"

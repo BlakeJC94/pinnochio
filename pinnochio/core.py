@@ -45,9 +45,7 @@ class CheckResult:
         return bool(self.issues)
 
 
-def load_uv_dependencies() -> tuple[
-    DependencyGroups, tomlkit.TOMLDocument, Config
-]:
+def load_uv_dependencies() -> tuple[DependencyGroups, tomlkit.TOMLDocument, Config]:
     """Load dependencies and config from pyproject.toml.
 
     Returns:
@@ -86,9 +84,7 @@ def load_uv_dependencies() -> tuple[
     dev_deps = cast(Array, dependency_groups_table["dev"])
 
     # Optional dependencies are optional
-    optional_deps_table = cast(
-        Table, project_table.get("optional-dependencies", {})
-    )
+    optional_deps_table = cast(Table, project_table.get("optional-dependencies", {}))
 
     groups = {
         "dependencies": [str(dep) for dep in dependencies],
@@ -130,9 +126,7 @@ def get_dependency_array(doc: tomlkit.TOMLDocument, group_name: str) -> Array:
         return cast(Array, dependency_groups_table["dev"])
     else:
         project_table = cast(Table, doc["project"])
-        optional_deps_table = cast(
-            Table, project_table["optional-dependencies"]
-        )
+        optional_deps_table = cast(Table, project_table["optional-dependencies"])
         return cast(Array, optional_deps_table[group_name])
 
 
@@ -154,9 +148,7 @@ def set_dependency_array(
         dependency_groups_table["dev"] = array
     else:
         project_table = cast(Table, doc["project"])
-        optional_deps_table = cast(
-            Table, project_table["optional-dependencies"]
-        )
+        optional_deps_table = cast(Table, project_table["optional-dependencies"])
         optional_deps_table[group_name] = array
 
 
@@ -339,8 +331,7 @@ def check_group_overlaps_match(
         if fix:
             print("Note: Automatic fixing of version drift is not implemented.")
             print(
-                "Please manually align the versions of the dependencies "
-                "listed above."
+                "Please manually align the versions of the dependencies listed above."
             )
             print("")
 
@@ -398,9 +389,7 @@ def _add_upper_bound(pin: str, config: Config) -> str:
             break
 
     if not lower_version:
-        raise ValueError(
-            f"Cannot add upper bound: no '>=' specifier found in '{pin}'"
-        )
+        raise ValueError(f"Cannot add upper bound: no '>=' specifier found in '{pin}'")
 
     # Calculate upper bound based on strategy
     if config.pinning_strategy == PinningStrategy.MAJOR:
@@ -409,8 +398,7 @@ def _add_upper_bound(pin: str, config: Config) -> str:
         upper_version = f"{lower_version.major}.{lower_version.minor + 1}.0"
     elif config.pinning_strategy == PinningStrategy.PATCH:
         upper_version = (
-            f"{lower_version.major}.{lower_version.minor}."
-            f"{lower_version.micro + 1}"
+            f"{lower_version.major}.{lower_version.minor}.{lower_version.micro + 1}"
         )
     else:
         raise ValueError(f"Unknown pinning strategy: {config.pinning_strategy}")
@@ -478,12 +466,8 @@ def check_no_overlap_between_core_deps_and_groups(
                 )
             print("Fixed: Redundant dependencies have been removed.")
             print("")
-            return CheckResult(
-                status=CheckStatus.FIXED, issues=dict(redundant_pins)
-            )
+            return CheckResult(status=CheckStatus.FIXED, issues=dict(redundant_pins))
 
-        return CheckResult(
-            status=CheckStatus.FAILED, issues=dict(redundant_pins)
-        )
+        return CheckResult(status=CheckStatus.FAILED, issues=dict(redundant_pins))
 
     return CheckResult(status=CheckStatus.PASSED, issues={})
